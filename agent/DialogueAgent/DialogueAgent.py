@@ -109,7 +109,4 @@ class DialogueAgent:
             config={"configurable": {"thread_id": str(state.get("customer_id"))}}
         )
 
-        for message in response["messages"]:
-            message.pretty_print()
-
         return {"messages": [response["messages"][-1]]}
