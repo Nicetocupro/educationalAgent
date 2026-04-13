@@ -4,24 +4,7 @@ import uuid
 
 """
 如果作为服务端的话，不应该这样去启动，应该是只需要提供创造thread_id的接口
-而不是每次都要，初始化 Graph()，像下面这样
-
-import uuid
-from fastapi import FastAPI
-
-app = FastAPI()
-
-@app.post("/threads")
-def create_thread():
-
-    return {"thread_id": str(uuid.uuid4())}
-
-@app.post("/chat")
-def chat(thread_id: str, message: str):
-
-    config = {"configurable": {"thread_id": thread_id}}
-    result = graph.invoke({"messages": [("user", message)]}, config=config)
-    return {"reply": result["messages"][-1].content}
+而不是每次都要，初始化 Graph()
 """
 
 graph = Graph()

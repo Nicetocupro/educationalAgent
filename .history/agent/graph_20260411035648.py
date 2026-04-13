@@ -53,7 +53,7 @@ class Graph:
         multi_agent_final.add_edge("supervisor", "create_memory")
         multi_agent_final.add_edge("create_memory", END)
 
-        self.app = multi_agent_final.compile(name="multi_agent_verify",checkpointer=checkpointer, store=in_memory_store)
+        self.app = multi_agent_final.compile(name="multi_agent_verify", checkpointer=checkpointer, store=in_memory_store)
 
     def invoke(self, messages: list, thread_id: str = "default") -> dict:
         """封装调用，外部不用关心 config 细节"""
@@ -71,18 +71,6 @@ class Graph:
     
     def get_state(self, thread_id: str = "default", checkpoint_id: str = "default"):
 
-        if checkpoint_id == "default":
-            config = {"configurable": {"thread_id": thread_id}}
-        else:
-            config = {"configurable": {"thread_id": thread_id, "checkpoint_id": checkpoint_id}}
+        config = {"configurable": {"thread_id": thread_id, "checkpoint_id": checkpoint_id}}
         
         return self.app.get_state(config)
-    
-    def get_state_history(self, thread_id: str = "default", checkpoint_id: str = "default"):
-
-        if checkpoint_id == "default":
-            config = {"configurable": {"thread_id": thread_id}}
-        else:
-            config = {"configurable": {"thread_id": thread_id, "checkpoint_id": checkpoint_id}}
-        
-        return self.app.get_state_history(config)

@@ -77,12 +77,3 @@ class Graph:
             config = {"configurable": {"thread_id": thread_id, "checkpoint_id": checkpoint_id}}
         
         return self.app.get_state(config)
-    
-    def get_state_history(self, thread_id: str = "default", checkpoint_id: str = "default"):
-
-        if checkpoint_id == "default":
-            config = {"configurable": {"thread_id": thread_id}}
-        else:
-            config = {"configurable": {"thread_id": thread_id, "checkpoint_id": checkpoint_id}}
-        
-        return self.app.get_state_history(config)

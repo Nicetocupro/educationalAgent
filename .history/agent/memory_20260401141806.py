@@ -63,10 +63,6 @@ def load_memory(state: State, store: BaseStore):
     user_id = state["customer_id"]
     namespace = ("memory_profile", user_id)
     existing_memory = store.get(namespace, "user_memory")
-    
-    print(store.get(namespace, "user_memory"))
-    print(state["messages"])
-
     formatted_memory = ""
     if existing_memory and existing_memory.value:
         formatted_memory = format_user_memory(existing_memory.value)
