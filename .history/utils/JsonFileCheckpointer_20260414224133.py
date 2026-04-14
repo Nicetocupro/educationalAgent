@@ -33,21 +33,6 @@ class MyJsonFileCheckpointer(BaseCheckpointSaver):
         self.base_dir = path(base_dir)
         self.base_dir.mkdir(parents=True, exist_ok=True)
 
-    def _serialize_checkpoint(self, checkpoint: Checkpoint) -> dict:
-        """把 channel_values 里的 LangChain 对象序列化为可 JSON 存储的格式"""
-        c = dict(checkpoint) # 浅拷贝
-        serialized_values = {}
-        
-        # channel_Value里面放着的都是HumanMessage类的对象，直接序列化会报错    
-        for channel, value in checkpoint["channel_values"].items():
-            type_str, data_bytes = self.serde.dumps_typed(value)
-            serialized_values[channel] = {
-                "type": type_str,
-                "data": data_bytes.decode("latin-1") # bytes → str 方便 JSON 存储
-            }
-        c["channel_values"] = serialized_values
-        return c
-
     def put(
         self,
         config: RunnableConfig,
@@ -56,11 +41,11 @@ class MyJsonFileCheckpointer(BaseCheckpointSaver):
         new_versions: ChannelVersions,
     ) -> RunnableConfig:
         """put的作用是将checkpoint写入json中"""
+        c = checkpoint.copy()
 
         thread_id = config["configurable"]["thread_id"]
         checkpoint_ns = config["configurable"]["checkpoint_ns"]
         checkpoint_id = checkpoint["id"]
-
         parent_checkpoint_id = config["configurable"].get("checkpoint_id")
         parent_config = (
           {
@@ -74,6 +59,19 @@ class MyJsonFileCheckpointer(BaseCheckpointSaver):
           else None
         )
             
+        FilePath = self.base_dir + "/" + thread_id + "/" + checkpoint_ns + "/" + checkpoint_id + ".json"
+        os.makedirs(os.path.dirname(FilePath), exist_ok=True)
+
+        # channel_Value里面放着的都是HumanMessage类的对象，直接序列化会报错
+        serialized_values = {}
+        for channel, value in checkpoint["channel_values"].items():
+            type_str, data_bytes = self.serde.dumps_typed(value)
+            serialized_values[channel] = {
+                "type": type_str,
+                "data": data_bytes.decode("latin-1") # bytes → str 方便 JSON 存储
+            }
+            
+
         data = {
             "config": {
                 "configurable": {
@@ -82,13 +80,10 @@ class MyJsonFileCheckpointer(BaseCheckpointSaver):
                     "checkpoint_id": checkpoint_id,
                 }
             },
-            "checkpoint": self._serialize_checkpoint(checkpoint),
+            "checkpoint": checkpoint,
             "metadata": dict(metadata),
             "parent_config": parent_config
         }
-
-        FilePath = self.base_dir + "/" + thread_id + "/" + checkpoint_ns + "/" + checkpoint_id + ".json"
-        os.makedirs(os.path.dirname(FilePath), exist_ok=True)
 
         with open(FilePath, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
@@ -102,15 +97,7 @@ class MyJsonFileCheckpointer(BaseCheckpointSaver):
         }
 
     def get_tuple(self, config: RunnableConfig) -> CheckpointTuple | None:
-        "Get a checkpoint tuple from the in-memory storage."
-
-        thread_id: str = config["configurable"]["thread_id"]
-        checkpoint_ns: str = config["configurable"].get("checkpoint_ns", "")
-        if checkpoint_id := get_checkpoint_id(config):
-            file_path = os.path.join(self.base_dir, thread_id, checkpoint_ns, f"{checkpoint_id}.json")
-            with open(file_path, "r", decoding="utf-8") as f:
-                            
-
+        
 
     def put_writes(
         self,

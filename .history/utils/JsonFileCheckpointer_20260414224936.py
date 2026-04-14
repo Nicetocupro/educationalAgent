@@ -107,9 +107,7 @@ class MyJsonFileCheckpointer(BaseCheckpointSaver):
         thread_id: str = config["configurable"]["thread_id"]
         checkpoint_ns: str = config["configurable"].get("checkpoint_ns", "")
         if checkpoint_id := get_checkpoint_id(config):
-            file_path = os.path.join(self.base_dir, thread_id, checkpoint_ns, f"{checkpoint_id}.json")
-            with open(file_path, "r", decoding="utf-8") as f:
-                            
+            
 
 
     def put_writes(
