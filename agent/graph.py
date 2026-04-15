@@ -10,6 +10,8 @@ from .Supervisor import Supervisor
 from .verify_info import VerifyInfoAgent
 from .ProfileAgent import ProfileAgent
 from utils.models import model
+from utils.JsonFileCheckpointer import MyJsonFileCheckpointer
+from pathlib import Path
 
 def should_interrupt(state: State):
     if state.get("customer_id") is not None: 
@@ -19,14 +21,16 @@ def should_interrupt(state: State):
 
 class Graph:
     """负责组装图"""
-    def __init__(self):
+    def __init__(self, checkpoint_dir: str | Path = "./checkpoints"):
 
         in_memory_store = InMemoryStore()
-        checkpointer = MemorySaver()
+        
+        # self._checkpointer = MemorySaver()
+        self._checkpointer = MyJsonFileCheckpointer(base_dir=Path(checkpoint_dir))
 
         verify_info_node = VerifyInfoAgent(model)
         human_input_node = human_input()
-        supervisor_node = Supervisor(model, checkpointer, in_memory_store)
+        supervisor_node = Supervisor(model, self._checkpointer, in_memory_store)
         profile_node = ProfileAgent()
 
         multi_agent_final = StateGraph(State, input_schema=inputState)
@@ -53,7 +57,7 @@ class Graph:
         multi_agent_final.add_edge("supervisor", "create_memory")
         multi_agent_final.add_edge("create_memory", END)
 
-        self.app = multi_agent_final.compile(name="multi_agent_verify",checkpointer=checkpointer, store=in_memory_store)
+        self.app = multi_agent_final.compile(name="multi_agent_verify",checkpointer=self._checkpointer, store=in_memory_store)
 
     def invoke(self, messages: list, thread_id: str = "default") -> dict:
         """封装调用，外部不用关心 config 细节"""

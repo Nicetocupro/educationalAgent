@@ -53,4 +53,4 @@ if __name__ == "__main__":
         
         chat(user_input, thread_id=thread_id)
     
-    print(graph.get_state(thread_id))
+#    print(graph.get_state(thread_id))
