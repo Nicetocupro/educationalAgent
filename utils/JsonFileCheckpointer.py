@@ -2,7 +2,7 @@ import contextlib
 from langgraph.checkpoint.base import BaseCheckpointSaver, JsonPlusSerializer
 from langchain_core.runnables import RunnableConfig
 import json
-import os
+from typing import Sequence
 from langgraph.checkpoint.base import (
     WRITES_IDX_MAP,
     BaseCheckpointSaver,
@@ -275,8 +275,6 @@ class MyJsonFileCheckpointer(BaseCheckpointSaver):
                         pending_writes=pending_writes or None,
                     )
                 
-        
-    
     def delete_thread(self, thread_id: str) -> None:
         
     def get_next_version(self, current: str | None, channel: None) -> str:
